@@ -45,7 +45,7 @@ async def process_image(image_url: str):
     session = SessionLocal()
     all_image_content = session.query(models.Content).filter(models.Content.content_type == "image").all()
 
-    mse_threshold = 100
+    mse_threshold = 1
     similar_images = []
 
     for content in all_image_content:
@@ -134,13 +134,14 @@ async def process_text(text: str):
     session = SessionLocal()
     all_text_content = session.query(models.Content).filter(models.Content.content_type == "text").all()
 
-    mse_threshold = 100
+    mse_threshold = 0.009
     similar_texts = []
 
     for content in all_text_content:
         existing_features = np.array(json.loads(content.content_features))
         mse = np.mean((features - existing_features) ** 2)
         if mse < mse_threshold:
+            print(mse)
             similar_texts.append(content.content_url)
     new_content = models.Content(content_type="text", content_url=text, content_features=json.dumps(features.tolist()))
     session.add(new_content)
